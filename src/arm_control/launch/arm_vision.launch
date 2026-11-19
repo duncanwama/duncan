@@ -1,0 +1,18 @@
+<launch>
+  <!-- arm_vision.launch - the arm, MoveIt and the colour-cube world (Module 3.6.3, Step 5) -->
+  <include file="$(find arm_control)/launch/arm_gazebo.launch">
+    <arg name="world" value="$(find arm_description)/worlds/colour_cubes.world"/>
+  </include>
+
+  <group ns="arm">
+    <include file="$(find arm_moveit_config)/launch/move_group.launch">
+      <arg name="allow_trajectory_execution" value="true"/>
+      <arg name="moveit_controller_manager" value="simple"/>
+      <arg name="load_robot_description"    value="false"/>
+      <arg name="info"                      value="true"/>
+    </include>
+    <include file="$(find arm_moveit_config)/launch/moveit_rviz.launch">
+      <arg name="rviz_config" value="$(find arm_moveit_config)/launch/moveit.rviz"/>
+    </include>
+  </group>
+</launch>

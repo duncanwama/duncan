@@ -1,0 +1,146 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <world name="obstacle_course">
+    <include><uri>model://ground_plane</uri></include>
+    <include><uri>model://sun</uri></include>
+
+    <!-- ===================== The room ===================== -->
+    <!-- One model with four links, one per wall. The model's pose moves the whole room;
+         each link's pose places one wall inside the model.
+         Inside of the room: x from -1.0 to 7.0, y from -2.0 to 2.0 (8 m x 4 m).
+         Walls are 0.1 m thick and 0.5 m high. -->
+    <model name="room">
+      <static>true</static>
+      <pose>3.0 0 0 0 0 0</pose>
+
+      <!-- North wall (top, +y): 8.2 m long, so it covers the corners -->
+      <link name="wall_north">
+        <pose>0 2.05 0.25 0 0 0</pose>
+        <collision name="collision">
+          <geometry><box><size>8.2 0.1 0.5</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>8.2 0.1 0.5</size></box></geometry>
+          <material><script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Grey</name>
+          </script></material>
+        </visual>
+      </link>
+
+      <!-- South wall (bottom, -y): the north wall mirrored -->
+      <link name="wall_south">
+        <pose>0 -2.05 0.25 0 0 0</pose>
+        <collision name="collision">
+          <geometry><box><size>8.2 0.1 0.5</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>8.2 0.1 0.5</size></box></geometry>
+          <material><script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Grey</name>
+          </script></material>
+        </visual>
+      </link>
+
+      <!-- West wall (behind the robot's start, -x): 4.0 m long, fits between the long walls -->
+      <link name="wall_west">
+        <pose>-4.05 0 0.25 0 0 0</pose>
+        <collision name="collision">
+          <geometry><box><size>0.1 4.0 0.5</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.1 4.0 0.5</size></box></geometry>
+          <material><script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Grey</name>
+          </script></material>
+        </visual>
+      </link>
+
+      <!-- East wall (behind the parking bay, +x) -->
+      <link name="wall_east">
+        <pose>4.05 0 0.25 0 0 0</pose>
+        <collision name="collision">
+          <geometry><box><size>0.1 4.0 0.5</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.1 4.0 0.5</size></box></geometry>
+          <material><script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Grey</name>
+          </script></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Red box 1 -->
+    <model name="box_1">
+      <static>true</static>
+      <pose>1.5 0 0.15 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.3 0.3 0.3</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.3 0.3 0.3</size></box></geometry>
+          <material><script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Red</name>
+          </script></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Red box 2 (copy of box 1, new name and pose) -->
+    <model name="box_2">
+      <static>true</static>
+      <pose>3.0 0.6 0.15 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.3 0.3 0.3</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.3 0.3 0.3</size></box></geometry>
+          <material><script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Red</name>
+          </script></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Red box 3 -->
+    <model name="box_3">
+      <static>true</static>
+      <pose>4.5 -0.6 0.15 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.3 0.3 0.3</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.3 0.3 0.3</size></box></geometry>
+          <material><script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Red</name>
+          </script></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Green parking square: flat, no collision, so the robot can drive onto it -->
+    <model name="parking_bay">
+      <static>true</static>
+      <pose>6.0 0 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.6 0.6 0.002</size></box></geometry>
+          <material><script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Green</name>
+          </script></material>
+        </visual>
+      </link>
+    </model>
+  </world>
+</sdf>

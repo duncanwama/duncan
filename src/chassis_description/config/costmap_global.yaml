@@ -1,0 +1,12 @@
+yaml:
+# costmap_global.yaml - the whole map, used by the global planner
+global_costmap:
+  global_frame: map
+  robot_base_frame: base_footprint
+  update_frequency: 2.0
+  publish_frequency: 1.0
+  transform_tolerance: 0.5
+  plugins:
+    - {name: static_layer,    type: "costmap_2d::StaticLayer"}     # the saved map
+    - {name: obstacle_layer,  type: "costmap_2d::ObstacleLayer"}   # the LiDAR
+    - {name: inflation_layer, type: "costmap_2d::InflationLayer"}  # the safety band

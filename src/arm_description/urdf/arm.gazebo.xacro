@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ============ Colours ============ -->
+  <gazebo reference="base_link"> <material>Gazebo/Grey</material>     </gazebo>
+  <gazebo reference="turret">    <material>Gazebo/Orange</material>   </gazebo>
+  <gazebo reference="upper_arm"> <material>Gazebo/Blue</material>     </gazebo>
+  <gazebo reference="forearm">   <material>Gazebo/Purple</material>     </gazebo>
+  <gazebo reference="wrist_roll"><material>Gazebo/Grey</material>     </gazebo>
+  <gazebo reference="wrist">     <material>Gazebo/Orange</material>   </gazebo>
+  <gazebo reference="palm">      <material>Gazebo/DarkGrey</material> </gazebo>
+
+  <!-- ============ Fingers: high grip, stiff contact ============ -->
+  <xacro:macro name="finger_gazebo" params="prefix">
+    <gazebo reference="${prefix}_finger">
+      <material>Gazebo/Black</material>
+      <mu1>2.0</mu1>
+      <mu2>2.0</mu2>
+      <kp>1000000.0</kp>
+      <kd>1.0</kd>
+      <minDepth>0.001</minDepth>
+      <maxVel>0.0</maxVel>
+    </gazebo>
+  </xacro:macro>
+  <xacro:finger_gazebo prefix="left"/>
+  <xacro:finger_gazebo prefix="right"/>
+
+  <!-- ============ Motors and controller manager ============ -->
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/arm</robotNamespace>
+      <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+    </plugin>
+  </gazebo>
+
+
+</robot>

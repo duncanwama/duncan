@@ -1,0 +1,19 @@
+<launch>
+  <!-- 1. Gazebo, the arm and its controllers (Step 4) -->
+  <include file="$(find arm_control)/launch/arm_gazebo.launch"/>
+
+  <!-- 2. MoveIt, in the same /arm namespace -->
+  <group ns="arm">
+    <include file="$(find arm_moveit_config)/launch/move_group.launch">
+      <arg name="allow_trajectory_execution" value="true"/>
+      <arg name="moveit_controller_manager" value="simple"/>
+      <arg name="load_robot_description"    value="false"/>  <!-- already loaded -->
+      <arg name="info"                      value="true"/>
+    </include>
+
+    <!-- 3. RViz with the MotionPlanning panel -->
+    <include file="$(find arm_moveit_config)/launch/moveit_rviz.launch">
+      <arg name="rviz_config" value="$(find arm_moveit_config)/launch/moveit.rviz"/>
+    </include>
+  </group>
+</launch>

@@ -1,0 +1,18 @@
+<launch>
+  <!-- Run xacro and store the result as the robot_description parameter -->
+  <param name="robot_description"
+         command="$(find xacro)/xacro $(find chassis_description)/urdf/chassis.urdf.xacro"/>
+
+  <!-- A window with sliders to move the joints -->
+  <node pkg="joint_state_publisher_gui" type="joint_state_publisher_gui"
+        name="joint_state_publisher_gui"/>
+
+  <!-- Turns the URDF + joint angles into TF frames -->
+  <node pkg="robot_state_publisher" type="robot_state_publisher"
+        name="robot_state_publisher"/>
+
+  <!-- The 3D viewer -->
+  <node pkg="rviz" type="rviz" name="rviz"
+      args="-d $(find chassis_description)/rviz/chassis.rviz"/>
+
+</launch>

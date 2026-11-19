@@ -1,0 +1,2 @@
+arm_control:arm_description:arm_moveit_config:chassis_description:gazebo_ros_link_attacher
+-DCATKIN_DEVEL_PREFIX=/home/duncan1124/assignment_ws/devel -DCMAKE_INSTALL_PREFIX=/home/duncan1124/assignment_ws/install -G Unix Makefiles

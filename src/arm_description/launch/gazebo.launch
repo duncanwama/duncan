@@ -1,0 +1,24 @@
+<launch>
+  <arg name="world" default="$(find arm_description)/worlds/table_cube.world"/>
+
+  <!-- 1. Gazebo, starting paused -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name"   value="$(arg world)"/>
+    <arg name="paused"       value="true"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui"          value="true"/>
+  </include>
+
+  <!-- 2. Robot description -->
+  <param name="robot_description"
+         command="$(find xacro)/xacro $(find arm_description)/urdf/arm.urdf.xacro"/>
+
+  <!-- 3. TF for the arm -->
+  <node pkg="robot_state_publisher" type="robot_state_publisher"
+        name="robot_state_publisher"/>
+
+  <!-- 4. Spawn the arm with joint2 tilted back, then start physics -->
+  <node pkg="gazebo_ros" type="spawn_model" name="spawn_arm" output="screen"
+        args="-urdf -param robot_description -model arm
+              -J joint2 -0.3 -unpause"/>
+</launch>

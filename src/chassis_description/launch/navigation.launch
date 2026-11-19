@@ -1,0 +1,59 @@
+<launch>
+  <!-- navigation.launch - drive to goals on a saved map (Module 3.5.2) -->
+  <arg name="world" default="$(find chassis_description)/worlds/slam_room.world"/>
+  <arg name="map"   default="$(find chassis_description)/maps/slam_room.yaml"/>
+  <arg name="x"     default="0"/>
+  <arg name="y"     default="0"/>
+  <arg name="yaw"   default="0"/>
+  <arg name="rviz"  default="true"/>
+
+  <!-- 1. Gazebo, the chassis and robot_state_publisher (Module 3.5) -->
+  <include file="$(find chassis_description)/launch/gazebo.launch">
+    <arg name="world" value="$(arg world)"/>
+    <arg name="x"     value="$(arg x)"/>
+    <arg name="y"     value="$(arg y)"/>
+    <arg name="yaw"   value="$(arg yaw)"/>
+  </include>
+
+  <!-- 2. The saved map from Module 3.5.1, published on /map -->
+  <node pkg="map_server" type="map_server" name="map_server" args="$(arg map)"/>
+
+  <!-- 3. AMCL: finds the robot on the map, publishes map -> odom -->
+  <node pkg="amcl" type="amcl" name="amcl" output="screen">
+    <param name="global_frame_id" value="map"/>
+    <param name="odom_frame_id"   value="odom"/>
+    <param name="base_frame_id"   value="base_footprint"/>
+    <param name="odom_model_type" value="diff-corrected"/>
+    <!-- how much AMCL distrusts /odom. Our odometry is exact (odometrySource world),
+         and diff-corrected needs much smaller values than the 0.2 default -->
+    <param name="odom_alpha1" value="0.005"/>   <!-- turn error from turning -->
+    <param name="odom_alpha2" value="0.005"/>   <!-- turn error from driving -->
+    <param name="odom_alpha3" value="0.005"/>   <!-- distance error from driving -->
+    <param name="odom_alpha4" value="0.005"/>   <!-- distance error from turning -->
+    <param name="laser_max_beams" value="60"/>
+    <param name="laser_max_range" value="10.0"/>
+    <param name="min_particles"   value="200"/>
+    <param name="max_particles"   value="2000"/>
+    <param name="update_min_d"    value="0.1"/>   <!-- update after moving 10 cm -->
+    <param name="update_min_a"    value="0.2"/>   <!-- or turning 0.2 rad -->
+    <param name="transform_tolerance" value="0.5"/>
+    <!-- start the guesses where the robot was spawned -->
+    <param name="initial_pose_x"  value="$(arg x)"/>
+    <param name="initial_pose_y"  value="$(arg y)"/>
+    <param name="initial_pose_a"  value="$(arg yaw)"/>
+  </node>
+
+  <!-- 4. move_base: costmaps, global planner and local planner -->
+  <node pkg="move_base" type="move_base" name="move_base" output="screen">
+    <rosparam file="$(find chassis_description)/config/costmap_common.yaml" command="load" ns="global_costmap"/>
+    <rosparam file="$(find chassis_description)/config/costmap_common.yaml" command="load" ns="local_costmap"/>
+    <rosparam file="$(find chassis_description)/config/costmap_global.yaml" command="load"/>
+    <rosparam file="$(find chassis_description)/config/costmap_local.yaml"  command="load"/>
+    <rosparam file="$(find chassis_description)/config/move_base.yaml"      command="load"/>
+    <rosparam file="$(find chassis_description)/config/dwa_local_planner.yaml" command="load"/>
+  </node>
+
+  <!-- 5. RViz with the navigation layout (saved in Step 5) -->
+  <node if="$(arg rviz)" pkg="rviz" type="rviz" name="rviz_nav"
+        args="-d $(find chassis_description)/rviz/navigation.rviz"/>
+</launch>

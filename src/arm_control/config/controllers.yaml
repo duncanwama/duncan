@@ -1,0 +1,34 @@
+# Loaded into the /arm namespace by the launch file.
+
+# 1. Publishes all joint angles on /arm/joint_states
+joint_state_controller:
+  type: joint_state_controller/JointStateController
+  publish_rate: 50
+
+# 2. Moves the six arm joints along a trajectory
+arm_controller:
+  type: position_controllers/JointTrajectoryController
+  joints:
+    - joint1
+    - joint2
+    - joint3
+    - joint4
+    - joint5
+    - joint6
+  constraints:
+    goal_time: 0.5                    # may arrive up to 0.5 s late
+    stopped_velocity_tolerance: 0.05
+  state_publish_rate: 25
+  action_monitor_rate: 10
+
+# 3. Opens and closes the two fingers
+gripper_controller:
+  type: position_controllers/JointTrajectoryController
+  joints:
+    - left_finger_joint
+    - right_finger_joint
+  constraints:
+    goal_time: 0.5
+    stopped_velocity_tolerance: 0.05
+  state_publish_rate: 25
+  action_monitor_rate: 10

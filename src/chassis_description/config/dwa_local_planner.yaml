@@ -1,0 +1,36 @@
+# dwa_local_planner.yaml - speeds, accelerations and when the goal counts as reached
+DWAPlannerROS:
+  # Speeds: about the same as Module 3.5 with z pressed a few times
+  max_vel_x: 0.2          # forward (m/s)
+  min_vel_x: 0.0           # never drive backwards
+  max_vel_y: 0.0           # a diff-drive robot cannot slide sideways
+  min_vel_y: 0.0
+  max_vel_trans: 0.25
+  min_vel_trans: 0.05
+  max_vel_theta: 0.4       # turning (rad/s): slow turns keep AMCL steady
+  min_vel_theta: 0.2       # slowest turn it will choose: too high and it overshoots the heading
+
+  # Accelerations: gentle, ready for a cube on the tray later
+  acc_lim_x: 0.5
+  acc_lim_y: 0.0
+  acc_lim_theta: 2.0       # high enough to stop a turn within one step
+
+  # When is the goal reached?
+  xy_goal_tolerance: 0.20      # within 20 cm
+  yaw_goal_tolerance: 0.05     # and within about 9 degrees of the goal heading
+  trans_stopped_vel: 0.05      # slower than this counts as stopped,
+  theta_stopped_vel: 0.05      # before the final turn on the spot
+  latch_xy_goal_tolerance: true  # once within 10 cm, only turn on the spot
+
+  # How it tries out tracks
+  sim_time: 1.5            # simulate each track 1.5 s ahead
+  vx_samples: 10
+  vy_samples: 1
+  vth_samples: 20
+
+  # How it scores tracks
+  path_distance_bias: 32.0   # stay close to the global path
+  goal_distance_bias: 20.0   # get closer to the goal
+  occdist_scale: 0.02        # keep away from obstacles
+
+  holonomic_robot: false

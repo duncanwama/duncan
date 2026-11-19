@@ -1,0 +1,8 @@
+prefix=/home/duncan1124/assignment_ws/devel
+
+Name: chassis_description
+Description: Description of chassis_description
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

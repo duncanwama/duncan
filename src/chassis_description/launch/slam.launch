@@ -1,0 +1,33 @@
+<launch>
+  <!-- slam.launch - Gazebo room + chassis + gmapping + RViz (Module 5) -->
+  <arg name="world" default="$(find chassis_description)/worlds/slam_room.world"/>
+  <arg name="rviz"  default="true"/>
+
+  <!-- 1. Gazebo, the chassis and robot_state_publisher (Module 3.5) -->
+  <include file="$(find chassis_description)/launch/gazebo.launch">
+    <arg name="world" value="$(arg world)"/>
+  </include>
+
+  <!-- 2. SLAM: reads /scan and TF, publishes /map and the map -> odom transform -->
+  <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
+    <param name="base_frame" value="base_footprint"/>
+    <param name="odom_frame" value="odom"/>
+    <param name="map_frame"  value="map"/>
+    <param name="maxRange"   value="8.0"/>   <!-- the LiDAR's range max -->
+    <param name="maxUrange"  value="8.0"/>    <!-- use readings up to 8 m to draw -->
+    <param name="delta"      value="0.05"/>   <!-- 5 cm map cells -->
+    <param name="map_update_interval" value="2.0"/>
+    <param name="linearUpdate"  value="0.1"/>
+    <param name="angularUpdate" value="0.1"/>
+    <param name="particles"     value="30"/>
+    <!-- start with a 20 m x 20 m map instead of the 200 m x 200 m default -->
+    <param name="xmin" value="-10.0"/>
+    <param name="ymin" value="-10.0"/>
+    <param name="xmax" value="10.0"/>
+    <param name="ymax" value="10.0"/>
+  </node>
+
+  <!-- 3. RViz with the SLAM layout (saved in Step 6b) -->
+  <node if="$(arg rviz)" pkg="rviz" type="rviz" name="rviz_slam"
+        args="-d $(find chassis_description)/rviz/slam.rviz"/>
+</launch>

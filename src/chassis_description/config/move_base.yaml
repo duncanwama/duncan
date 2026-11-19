@@ -1,0 +1,15 @@
+# move_base.yaml - which planners to use and how often to run them
+base_global_planner: navfn/NavfnROS
+base_local_planner: dwa_local_planner/DWAPlannerROS
+
+controller_frequency: 5.0     # local planner: new /cmd_vel 5 times a second
+planner_frequency: 1.0        # global planner: replan once a second
+planner_patience: 5.0         # give up if no global path is found for 5 s
+controller_patience: 10.0     # give up if the local planner is stuck for 10 s
+
+oscillation_timeout: 10.0     # moving back and forth this long counts as stuck
+oscillation_distance: 0.2
+
+recovery_behavior_enabled: true
+clearing_rotation_allowed: true   # when stuck, spin on the spot to look again
+shutdown_costmaps: false

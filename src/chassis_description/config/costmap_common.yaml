@@ -1,0 +1,25 @@
+# costmap_common.yaml - shared by the global and the local costmap
+# (navigation.launch loads this file twice, once into each)
+
+# Robot outline seen from above, measured from base_footprint (m)
+footprint: [[0.21, 0.20], [0.21, -0.20], [-0.21, -0.20], [-0.21, 0.20]]
+footprint_padding: 0.01
+
+# Live obstacles from the LiDAR
+obstacle_layer:
+  observation_sources: laser
+  laser:
+    sensor_frame: laser_link
+    data_type: LaserScan
+    topic: scan
+    marking: true          # a beam that hits something marks that cell as an obstacle
+    clearing: true         # a beam that passes through a cell marks it free again
+    inf_is_valid: true     # "inf" (nothing hit) also clears, all the way to raytrace_range
+    obstacle_range: 3.0    # only mark obstacles closer than 3 m
+    raytrace_range: 3.5    # clear cells up to 3.5 m away
+
+# Safety band round every obstacle
+inflation_layer:
+  inflation_radius: 0.30     # cost spreads up to 0.30 m from an obstacle
+  cost_scaling_factor: 5.0   # higher = cost falls off faster, so paths may go closer
+  

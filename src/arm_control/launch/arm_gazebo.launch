@@ -1,0 +1,35 @@
+<launch>
+  <arg name="world" default="$(find arm_description)/worlds/table_cube.world"/>
+
+  <!-- 1. Gazebo with the table and cube -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name"   value="$(arg world)"/>
+    <arg name="paused"       value="true"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui"          value="true"/>
+  </include>
+
+  <!-- 2. Everything for the arm lives in /arm -->
+  <group ns="arm">
+
+    <!-- robot description at /arm/robot_description -->
+    <param name="robot_description"
+           command="$(find xacro)/xacro $(find arm_description)/urdf/arm.urdf.xacro"/>
+
+    <!-- controller settings into /arm/... -->
+    <rosparam file="$(find arm_control)/config/controllers.yaml" command="load"/>
+
+    <!-- put the arm in the world, then start physics -->
+    <node pkg="gazebo_ros" type="spawn_model" name="spawn_arm" output="screen"
+          args="-urdf -param robot_description -model arm -unpause"/>
+
+    <!-- load and start the three controllers -->
+    <node pkg="controller_manager" type="spawner" name="controller_spawner"
+          output="screen"
+          args="--timeout 120 joint_state_controller arm_controller gripper_controller"/>
+
+    <!-- TF from /arm/joint_states -->
+    <node pkg="robot_state_publisher" type="robot_state_publisher"
+          name="robot_state_publisher"/>
+  </group>
+</launch>

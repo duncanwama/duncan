@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<!-- camera.xacro - a camera above the table, looking straight down (Module 3.6.1, Step 7) -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Where the camera sits, measured from base_link (m) -->
+  <xacro:property name="cam_x" value="0.35"/>   <!-- over the middle of the table -->
+  <xacro:property name="cam_y" value="0.0"/>
+  <xacro:property name="cam_z" value="0.80"/>   <!-- 0.50 m above the table top -->
+
+  <!-- The camera body: a small black box -->
+  <link name="camera_link">
+    <visual>
+      <geometry><box size="0.03 0.08 0.03"/></geometry>
+      <material name="black"/>          <!-- already defined in arm.urdf.xacro -->
+    </visual>
+    <collision>
+      <geometry><box size="0.03 0.08 0.03"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.05"/>
+      <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/>
+    </inertial>
+  </link>
+
+  <!-- Fixed above the table, pitched 90 degrees so its x axis points down -->
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+    <origin xyz="${cam_x} ${cam_y} ${cam_z}" rpy="0 ${pi/2} 0"/>
+  </joint>
+
+  <!-- ROS image convention: z forward (down at the table), x right, y down the image -->
+  <link name="camera_optical_link"/>
+  <joint name="camera_optical_joint" type="fixed">
+    <parent link="camera_link"/>
+    <child link="camera_optical_link"/>
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+  </joint>
+
+  <!-- The Gazebo sensor and its ROS plugin -->
+  <gazebo reference="camera_link">
+    <material>Gazebo/Black</material>
+    <sensor type="camera" name="station_cam">
+      <always_on>true</always_on>
+      <update_rate>15</update_rate>          <!-- frames per second -->
+      <visualize>true</visualize>            <!-- draw the view cone in Gazebo -->
+      <camera>
+        <horizontal_fov>1.047</horizontal_fov>   <!-- 60 degrees wide -->
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>5.0</far>
+        </clip>
+      </camera>
+      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <cameraName>camera</cameraName>                    <!-- topics start with /camera -->
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>camera_optical_link</frameName>         <!-- the optical frame, not camera_link -->
+      </plugin>
+    </sensor>
+  </gazebo>
+
+</robot>

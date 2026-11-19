@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<!-- slam_room.world - an 8 m x 6 m room to map with SLAM (Module 5) -->
+<sdf version="1.6">
+  <world name="slam_room">
+    <include><uri>model://ground_plane</uri></include>
+    <include><uri>model://sun</uri></include>
+
+    <!-- Four outer walls and one dividing wall, in one static model -->
+    <model name="walls">
+      <static>true</static>
+      <link name="link">
+        <collision name="north_c"><pose>0 3.05 0.25 0 0 0</pose><geometry><box><size>8.2 0.1 0.5</size></box></geometry></collision>
+        <visual name="north_v"><pose>0 3.05 0.25 0 0 0</pose><geometry><box><size>8.2 0.1 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Grey</name></script></material></visual>
+        <collision name="south_c"><pose>0 -3.05 0.25 0 0 0</pose><geometry><box><size>8.2 0.1 0.5</size></box></geometry></collision>
+        <visual name="south_v"><pose>0 -3.05 0.25 0 0 0</pose><geometry><box><size>8.2 0.1 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Grey</name></script></material></visual>
+        <collision name="east_c"><pose>4.05 0 0.25 0 0 0</pose><geometry><box><size>0.1 6.0 0.5</size></box></geometry></collision>
+        <visual name="east_v"><pose>4.05 0 0.25 0 0 0</pose><geometry><box><size>0.1 6.0 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Grey</name></script></material></visual>
+        <collision name="west_c"><pose>-4.05 0 0.25 0 0 0</pose><geometry><box><size>0.1 6.0 0.5</size></box></geometry></collision>
+        <visual name="west_v"><pose>-4.05 0 0.25 0 0 0</pose><geometry><box><size>0.1 6.0 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Grey</name></script></material></visual>
+        <collision name="divider_c"><pose>0 2.25 0.25 0 0 0</pose><geometry><box><size>0.1 1.5 0.5</size></box></geometry></collision>
+        <visual name="divider_v"><pose>0 2.25 0.25 0 0 0</pose><geometry><box><size>0.1 1.5 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Grey</name></script></material></visual>
+      </link>
+    </model>
+
+    <model name="box_1">
+      <static>true</static>
+      <pose>2.0 1.2 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.8 0.8 0.5</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.8 0.8 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Wood</name></script></material></visual>
+      </link>
+    </model>
+
+    <model name="box_2">
+      <static>true</static>
+      <pose>-2.0 -1.2 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>1.2 0.6 0.5</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>1.2 0.6 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Wood</name></script></material></visual>
+      </link>
+    </model>
+
+    <model name="pillar">
+      <static>true</static>
+      <pose>-2.0 1.5 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><cylinder><radius>0.2</radius><length>0.5</length></cylinder></geometry></collision>
+        <visual name="visual"><geometry><cylinder><radius>0.2</radius><length>0.5</length></cylinder></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Red</name></script></material></visual>
+      </link>
+    </model>
+  </world>
+</sdf>

@@ -1,0 +1,211 @@
+<?xml version="1.0"?>
+<robot name="arm" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ===================== 1. Properties ===================== -->
+  <xacro:property name="base_radius"   value="0.08"/>
+  <xacro:property name="base_height"   value="0.05"/>
+  <xacro:property name="base_mass"     value="2.0"/>
+  <xacro:property name="turret_radius" value="0.05"/>
+  <xacro:property name="turret_height" value="0.10"/>
+  <xacro:property name="turret_mass"   value="0.5"/>
+  <xacro:property name="link_width"    value="0.04"/>   <!-- arm links are 4 cm square -->
+  <xacro:property name="upper_len"     value="0.25"/>
+  <xacro:property name="upper_mass"    value="0.4"/>
+  <xacro:property name="fore_len"      value="0.21"/>
+  <xacro:property name="fore_mass"     value="0.3"/>
+  <xacro:property name="roll_len"      value="0.04"/>   <!-- forearm 0.21 + roll 0.04 = 0.25 -->
+  <xacro:property name="roll_mass"     value="0.1"/>
+  <xacro:property name="wrist_len"     value="0.06"/>
+  <xacro:property name="wrist_mass"    value="0.1"/>
+  <xacro:property name="palm_x"        value="0.03"/>
+  <xacro:property name="palm_y"        value="0.10"/>
+  <xacro:property name="palm_z"        value="0.02"/>
+  <xacro:property name="palm_mass"     value="0.1"/>
+  <xacro:property name="finger_x"      value="0.02"/>
+  <xacro:property name="finger_y"      value="0.01"/>
+  <xacro:property name="finger_len"    value="0.06"/>
+  <xacro:property name="finger_mass"   value="0.02"/>
+  <xacro:property name="finger_travel" value="0.04"/>   <!-- each finger opens 4 cm -->
+  <xacro:property name="effort"        value="10.0"/>   <!-- N.m, strongest joint push -->
+  <xacro:property name="velocity"      value="1.0"/>    <!-- rad/s, fastest joint speed -->
+
+  <!-- ===================== 2. Colours ===================== -->
+  <material name="grey">   <color rgba="0.5 0.5 0.5 1"/></material>
+  <material name="orange"> <color rgba="1.0 0.5 0.0 1"/></material>
+  <material name="blue">   <color rgba="0.1 0.3 0.8 1"/></material>
+  <material name="purple"> <color rgba="0.5 0.0 0.5 1"/></material>
+  <material name="dark">   <color rgba="0.2 0.2 0.2 1"/></material>
+  <material name="black">  <color rgba="0.05 0.05 0.05 1"/></material>
+
+  <!-- ===================== 3. Inertia macros ===================== -->
+  <!-- oz = height of the centre of mass above the link origin -->
+  <xacro:macro name="box_inertia" params="m x y z oz">
+    <inertial>
+      <origin xyz="0 0 ${oz}" rpy="0 0 0"/>
+      <mass value="${m}"/>
+      <inertia ixx="${m*(y*y+z*z)/12}" ixy="0" ixz="0"
+               iyy="${m*(x*x+z*z)/12}" iyz="0"
+               izz="${m*(x*x+y*y)/12}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="cylinder_inertia" params="m r h oz">
+    <inertial>
+      <origin xyz="0 0 ${oz}" rpy="0 0 0"/>
+      <mass value="${m}"/>
+      <inertia ixx="${m*(3*r*r+h*h)/12}" ixy="0" ixz="0"
+               iyy="${m*(3*r*r+h*h)/12}" iyz="0"
+               izz="${m*r*r/2}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- ===================== 4. Link and joint macros ===================== -->
+  <!-- A box link that starts at its joint and points up its z axis -->
+  <xacro:macro name="arm_link" params="name length mass color">
+    <link name="${name}">
+      <visual>
+        <origin xyz="0 0 ${length/2}" rpy="0 0 0"/>
+        <geometry><box size="${link_width} ${link_width} ${length}"/></geometry>
+        <material name="${color}"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 ${length/2}" rpy="0 0 0"/>
+        <geometry><box size="${link_width} ${link_width} ${length}"/></geometry>
+      </collision>
+      <xacro:box_inertia m="${mass}" x="${link_width}" y="${link_width}" z="${length}" oz="${length/2}"/>
+    </link>
+  </xacro:macro>
+
+  <!-- A revolute joint placed z metres above its parent's origin -->
+  <xacro:macro name="arm_joint" params="name parent child z axis lower upper">
+    <joint name="${name}" type="revolute">
+      <parent link="${parent}"/>
+      <child link="${child}"/>
+      <origin xyz="0 0 ${z}" rpy="0 0 0"/>
+      <axis xyz="${axis}"/>
+      <limit lower="${lower}" upper="${upper}" effort="${effort}" velocity="${velocity}"/>
+      <dynamics damping="0.5" friction="0.1"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- ===================== 5. Base, fixed to the world ===================== -->
+  <link name="world"/>
+
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 ${base_height/2}" rpy="0 0 0"/>
+      <geometry><cylinder radius="${base_radius}" length="${base_height}"/></geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${base_height/2}" rpy="0 0 0"/>
+      <geometry><cylinder radius="${base_radius}" length="${base_height}"/></geometry>
+    </collision>
+    <xacro:cylinder_inertia m="${base_mass}" r="${base_radius}" h="${base_height}" oz="${base_height/2}"/>
+  </link>
+
+  <joint name="world_joint" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ===================== 6. Turret (joint1: base yaw) ===================== -->
+  <link name="turret">
+    <visual>
+      <origin xyz="0 0 ${turret_height/2}" rpy="0 0 0"/>
+      <geometry><cylinder radius="${turret_radius}" length="${turret_height}"/></geometry>
+      <material name="orange"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${turret_height/2}" rpy="0 0 0"/>
+      <geometry><cylinder radius="${turret_radius}" length="${turret_height}"/></geometry>
+    </collision>
+    <xacro:cylinder_inertia m="${turret_mass}" r="${turret_radius}" h="${turret_height}" oz="${turret_height/2}"/>
+  </link>
+
+  <xacro:arm_joint name="joint1" parent="base_link" child="turret"
+                   z="${base_height}" axis="0 0 1" lower="${-pi}" upper="${pi}"/>
+
+  <!-- ===================== 7. Arm links (joint2-joint5) ===================== -->
+  <xacro:arm_link name="upper_arm" length="${upper_len}" mass="${upper_mass}" color="blue"/>
+  <xacro:arm_joint name="joint2" parent="turret" child="upper_arm"
+                   z="${turret_height}" axis="0 1 0" lower="${-pi/2}" upper="${pi/2}"/>
+
+  <xacro:arm_link name="forearm" length="${fore_len}" mass="${fore_mass}" color="purple"/>
+  <xacro:arm_joint name="joint3" parent="upper_arm" child="forearm"
+                   z="${upper_len}" axis="0 1 0" lower="-2.5" upper="2.5"/>
+
+  <!-- joint4: forearm roll -->
+  <xacro:arm_link name="wrist_roll" length="${roll_len}" mass="${roll_mass}" color="grey"/>
+  <xacro:arm_joint name="joint4" parent="forearm" child="wrist_roll"
+                   z="${fore_len}" axis="0 0 1" lower="${-pi}" upper="${pi}"/>
+
+  <!-- joint5: wrist pitch -->
+  <xacro:arm_link name="wrist" length="${wrist_len}" mass="${wrist_mass}" color="orange"/>
+  <xacro:arm_joint name="joint5" parent="wrist_roll" child="wrist"
+                   z="${roll_len}" axis="0 1 0" lower="-2.5" upper="2.5"/>
+
+  <!-- ===================== 8. Palm (joint6: wrist roll) ===================== -->
+  <link name="palm">
+    <visual>
+      <origin xyz="0 0 ${palm_z/2}" rpy="0 0 0"/>
+      <geometry><box size="${palm_x} ${palm_y} ${palm_z}"/></geometry>
+      <material name="dark"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${palm_z/2}" rpy="0 0 0"/>
+      <geometry><box size="${palm_x} ${palm_y} ${palm_z}"/></geometry>
+    </collision>
+    <xacro:box_inertia m="${palm_mass}" x="${palm_x}" y="${palm_y}" z="${palm_z}" oz="${palm_z/2}"/>
+  </link>
+
+  <xacro:arm_joint name="joint6" parent="wrist" child="palm"
+                   z="${wrist_len}" axis="0 0 1" lower="${-pi}" upper="${pi}"/>
+
+  <!-- ===================== 9. Fingers (prismatic) ===================== -->
+  <!-- reflect = 1 for the left finger (+y), -1 for the right finger (-y) -->
+  <xacro:macro name="finger" params="prefix reflect">
+    <link name="${prefix}_finger">
+      <visual>
+        <origin xyz="0 ${reflect*finger_y/2} ${finger_len/2}" rpy="0 0 0"/>
+        <geometry><box size="${finger_x} ${finger_y} ${finger_len}"/></geometry>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <origin xyz="0 ${reflect*finger_y/2} ${finger_len/2}" rpy="0 0 0"/>
+        <geometry><box size="${finger_x} ${finger_y} ${finger_len}"/></geometry>
+      </collision>
+      <xacro:box_inertia m="${finger_mass}" x="${finger_x}" y="${finger_y}" z="${finger_len}" oz="${finger_len/2}"/>
+    </link>
+
+    <joint name="${prefix}_finger_joint" type="prismatic">
+      <parent link="palm"/>
+      <child link="${prefix}_finger"/>
+      <origin xyz="0 0 ${palm_z}" rpy="0 0 0"/>
+      <axis xyz="0 ${reflect} 0"/>                     <!-- slides outwards -->
+      <limit lower="0" upper="${finger_travel}" effort="20" velocity="0.1"/>
+      <dynamics damping="1.0" friction="0.1"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:finger prefix="left"  reflect="1"/>
+  <xacro:finger prefix="right" reflect="-1"/>
+
+  <!-- ===================== 10. End effector frame ===================== -->
+  <!-- The grasp point: centred between the fingers, 2 cm below the fingertips -->
+  <link name="ee_link"/>
+  <joint name="ee_joint" type="fixed">
+    <parent link="palm"/>
+    <child link="ee_link"/>
+    <origin xyz="0 0 ${palm_z + finger_len - 0.02}" rpy="0 0 0"/>
+  </joint>
+  
+  <!-- ===================== 11. Gazebo extras ===================== -->
+  <xacro:include filename="$(find arm_description)/urdf/arm.gazebo.xacro"/>
+
+  <!-- ===================== 12. Camera ===================== -->
+  <xacro:include filename="$(find arm_description)/urdf/camera.xacro"/>
+  
+  <xacro:include filename="$(find arm_description)/urdf/arm.transmission.xacro"/>
+</robot>
